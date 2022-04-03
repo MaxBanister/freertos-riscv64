@@ -22,11 +22,12 @@ RTOS_SOURCE_DIR = $(abspath ../../Source)
 DEMO_SOURCE_DIR = $(abspath ../Common/Minimal)
 
 CPPFLAGS = \
-	-DportasmHANDLE_INTERRUPT=handle_trap \
+	-DportHANDLE_INTERRUPT=handle_trap \
+	-DportHANDLE_EXCEPTION=handle_trap \
 	-I . -I ../Common/include \
 	-I $(RTOS_SOURCE_DIR)/include \
 	-I $(RTOS_SOURCE_DIR)/portable/GCC/RISC-V \
-	-I $(RTOS_SOURCE_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions
+	-I $(RTOS_SOURCE_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RISCV_MTIME_CLINT_no_extensions
 CFLAGS  = -march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 	-Wall \
 	-fmessage-length=0 \
@@ -66,7 +67,7 @@ ASMS = start.S \
 OBJS = $(SRCS:%.c=$(BUILD_DIR)/%$(XLEN).o) $(ASMS:%.S=$(BUILD_DIR)/%$(XLEN).o)
 DEPS = $(SRCS:%.c=$(BUILD_DIR)/%$(XLEN).d) $(ASMS:%.S=$(BUILD_DIR)/%$(XLEN).d)
 
-$(BUILD_DIR)/RTOSDemo$(XLEN).axf: $(OBJS) $(BUILD_DIR)/fake_rom$(BASE_ADDRESS).lds Makefile
+$(BUILD_DIR)/RTOSDemo$(XLEN).elf: $(OBJS) $(BUILD_DIR)/fake_rom$(BASE_ADDRESS).lds Makefile
 	$(CC) $(LDFLAGS) $(OBJS) -T$(BUILD_DIR)/fake_rom$(BASE_ADDRESS).lds -o $@
 
 $(BUILD_DIR)/%$(XLEN).o: %.c Makefile

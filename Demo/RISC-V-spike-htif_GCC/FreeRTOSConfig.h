@@ -42,6 +42,7 @@
  *----------------------------------------------------------*/
 
 /* See https://www.freertos.org/Using-FreeRTOS-on-RISC-V.html */
+#define configCLINT_BASE_ADDRESS        CLINT_ADDR
 #define configMTIME_BASE_ADDRESS		( CLINT_ADDR + CLINT_MTIME )
 #define configMTIMECMP_BASE_ADDRESS		( CLINT_ADDR + CLINT_MTIMECMP )
 
@@ -93,10 +94,11 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelete					1
 #define INCLUDE_vTaskCleanUpResources		1
 #define INCLUDE_vTaskSuspend				1
-#define INCLUDE_vTaskDelayUntil				1
+//#define INCLUDE_vTaskDelayUntil				1
 #define INCLUDE_vTaskDelay					1
 #define INCLUDE_eTaskGetState				1
 #define INCLUDE_xTimerPendFunctionCall		1
+#define INCLUDE_xTaskDelayUntil             1
 #define INCLUDE_xTaskAbortDelay				1
 #define INCLUDE_xTaskGetHandle				1
 #define INCLUDE_xSemaphoreGetMutexHolder	1

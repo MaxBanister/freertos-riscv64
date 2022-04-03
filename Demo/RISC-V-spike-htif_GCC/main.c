@@ -32,6 +32,7 @@
 #define DEMO_BLINKY	1
 
 extern void freertos_risc_v_trap_handler( void );
+extern int _stack_top;
 
 void vApplicationMallocFailedHook( void );
 void vApplicationIdleHook( void );
@@ -50,7 +51,10 @@ int main_blinky( void );
 int main( void )
 {
 	int ret;
-	prvSetupSpike();
+	//prvSetupSpike();
+
+	// Reuse main stack as the ISR stack
+	xPortFreeRTOSInit((StackType_t)&_stack_top);
 
 #if defined(DEMO_BLINKY)
 	ret = main_blinky();
