@@ -59,7 +59,7 @@ static QueueHandle_t xQueue = NULL;
 static void prvQueueSendTask( void *pvParameters )
 {
 	TickType_t xNextWakeTime;
-	unsigned long ulValueToSend = 0UL;
+	double ulValueToSend = 0;
 
 	/* Remove compiler warning about unused parameter. */
 	( void ) pvParameters;
@@ -69,15 +69,16 @@ static void prvQueueSendTask( void *pvParameters )
 
 	for( ;; )
 	{
+		vSendString("Getting here 2");
 		/* Place this task in the blocked state until it is time to run again. */
 		vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
 
 		ulValueToSend++;
 
 		char buf[40];
-		sprintf( buf, "%d: %s: send %ld", xGetCoreID(),
+		sprintf( buf, "%d: %s: send %lld", xGetCoreID(),
 				pcTaskGetName( xTaskGetCurrentTaskHandle() ),
-				ulValueToSend );
+				(long long)ulValueToSend );
 		vSendString( buf );
 
 		/* 0 is used as the block time so the sending operation will not block -
@@ -96,18 +97,20 @@ static void prvQueueReceiveTask( void *pvParameters )
 
 	for( ;; )
 	{
-
-		unsigned long ulReceivedValue;
+		vSendString("Getting here\n");
+		double ulReceivedValue;
 		/* Wait until something arrives in the queue - this task will block
 		indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
 		FreeRTOSConfig.h. */
 		xQueueReceive( xQueue, &ulReceivedValue, portMAX_DELAY );
 
 		/*  To get here something must have been received from the queue. */
+		// WARNING: sprintf may call alloc when using it with floating point
+		// https://nadler.com/embedded/newlibAndFreeRTOS.html
 		char buf[40];
-		sprintf( buf, "%d: %s: received %ld", xGetCoreID(),
+		sprintf( buf, "%d: %s: received %lld", xGetCoreID(),
 				pcTaskGetName( xTaskGetCurrentTaskHandle() ),
-				ulReceivedValue );
+				(long long)ulReceivedValue );
 		vSendString( buf );
 	}
 }
@@ -119,7 +122,7 @@ int main_blinky( void )
 	vSendString( "Hello FreeRTOS!" );
 
 	/* Create the queue. */
-	xQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( unsigned long ) );
+	xQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( double ) );
 
 	if( xQueue != NULL )
 	{

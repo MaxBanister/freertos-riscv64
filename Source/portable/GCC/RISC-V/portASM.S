@@ -186,6 +186,10 @@ definitions. */
 // allocates space by decrementing the stack pointer
 
 .macro portSAVE_FpuReg
+    /* Make room for the additional FPU registers. */
+    // we move this to the unconditional part so that dummy space is always allocated/deallocated
+    addi sp, sp, -portasmFPU_CONTEXT_WORDSIZE
+
     /* get FS field from mstatus */
     li t0, MSTATUS_FS
     csrr 	t1, mstatus
@@ -193,8 +197,6 @@ definitions. */
     li t2, MSTATUS_FS_DIRTY
     bne t2, t0, 1f
     /* FS == dirty */
-    /* Make room for the additional FPU registers. */
-    addi sp, sp, -portasmFPU_CONTEXT_WORDSIZE
     store_fpu  f0,  PORT_CONTEXT_fpuOFFSET(0)(sp)	/* f0(ft0)		FP temporary register */
     store_fpu  f1,  PORT_CONTEXT_fpuOFFSET(1)(sp)	/* f1(ft1)		FP temporary register */
     store_fpu  f2,  PORT_CONTEXT_fpuOFFSET(2)(sp)	/* f2(ft2)		FP temporary register */
@@ -290,8 +292,6 @@ definitions. */
     load_fpu  f29,  PORT_CONTEXT_fpuOFFSET(29)(sp)	/* f29(ft9)		FP temporary register */
     load_fpu  f30,  PORT_CONTEXT_fpuOFFSET(30)(sp)	/* f30(ft10)	FP temporary register */
     load_fpu  f31,  PORT_CONTEXT_fpuOFFSET(31)(sp)	/* f31(ft11)	FP temporary register */
-    /* Remove space added for additional fpu registers. */
-    addi sp, sp, portasmFPU_CONTEXT_WORDSIZE
 
     /* must set FS to clean */
     li 	t0, ~MSTATUS_FS_CLEAN
@@ -299,6 +299,10 @@ definitions. */
     /* store it before restore mstatus in portRESTORE_BaseReg */
     store_x  t1, PORT_CONTEXT_mstatusOFFSET(a0)
 1:
+    /* Remove space added for additional fpu registers. */
+    // we move this to the unconditional part so that dummy space is always allocated/deallocated
+    addi sp, sp, portasmFPU_CONTEXT_WORDSIZE
+
     .endm
 /*************************************************************/
 // allocates space by decrementing sp
@@ -649,11 +653,13 @@ end_trap_handler:
     load_x s0, pxCurrentTCB			/* Load pxCurrentTCB. */
 
     /* Update privilege_status if needed */
+    // this is definitely wrong
     load_x  a0, PORT_CONTEXT_mstatusOFFSET(sp)
     jal vPortUpdatePrivilegeStatus
 
     /* restore registers */
 #ifdef __riscv_fdiv
+    // this is also wrong, since there is no guarantee FP regs were actually used
     addi 	a0, sp, portasmFPU_CONTEXT_WORDSIZE
     addi 	a0, a0, portasmADDITIONAL_CONTEXT_WORDSIZE
     portRESTORE_FpuReg
@@ -742,7 +748,7 @@ xPortStartFirstTask:
 
     // so, put in a hacky fix to pop off zeroed floating point regs
     // this will have to change if ever we use floating point in main
-    addi sp, sp, portasmFPU_CONTEXT_WORDSIZE
+    //addi sp, sp, portasmFPU_CONTEXT_WORDSIZE
 
     /* Restore first TCB member */
     // huh? when did this ever change?
