@@ -5,7 +5,7 @@ CPP     = $(CROSS)cpp
 OBJCOPY = $(CROSS)objcopy
 ARCH    = $(CROSS)ar
 DEBUG ?= 0
-BASE_ADDRESS ?= 0x80000000
+BASE_ADDRESS ?= 0x90000000
 
 ifeq ($(XLEN), 64)
     MARCH = rv64imafdc
@@ -24,6 +24,7 @@ DEMO_SOURCE_DIR = $(abspath ../Common/Minimal)
 CPPFLAGS = \
 	-DportHANDLE_INTERRUPT=handle_trap \
 	-DportHANDLE_EXCEPTION=handle_trap \
+	-DportUSING_MPU_WRAPPERS=1 \
 	-I . -I ../Common/include \
 	-I $(RTOS_SOURCE_DIR)/include \
 	-I $(RTOS_SOURCE_DIR)/portable/GCC/RISC-V \
@@ -37,7 +38,8 @@ CFLAGS  = -march=$(MARCH) -mabi=$(MABI) -mcmodel=medany \
 ASFLAGS = -march=$(MARCH) -mabi=$(MABI) -mcmodel=medany
 LDFLAGS = -nostartfiles \
 	-Xlinker --gc-sections \
-	-Xlinker --defsym=__stack_size=$(STACK_SIZE)
+	-Xlinker --defsym=__stack_size=$(STACK_SIZE) \
+	-Xlinker -Map=mapfile
 
 ifeq ($(DEBUG), 1)
     CFLAGS += -Og -ggdb3
@@ -59,7 +61,9 @@ SRCS = main.c main_blinky.c riscv-virt.c htif.c \
 	$(RTOS_SOURCE_DIR)/tasks.c \
 	$(RTOS_SOURCE_DIR)/timers.c \
 	$(RTOS_SOURCE_DIR)/portable/MemMang/heap_4.c \
-	$(RTOS_SOURCE_DIR)/portable/GCC/RISC-V/port.c
+	$(RTOS_SOURCE_DIR)/portable/GCC/RISC-V/port.c \
+	$(RTOS_SOURCE_DIR)/portable/GCC/RISC-V/pmp.c \
+	$(RTOS_SOURCE_DIR)/portable/Common/mpu_wrappers.c
 
 ASMS = start.S \
 	$(RTOS_SOURCE_DIR)/portable/GCC/RISC-V/portASM.S

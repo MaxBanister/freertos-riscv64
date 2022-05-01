@@ -5,14 +5,27 @@ MEMORY
 {
 	/* Fake ROM area */
         /* BASE_ADDRESS is replaced with the real value by the Makefile. */
-	rom (rxa) : ORIGIN = BASE_ADDRESS, LENGTH = 512K
+	rom (wxa) : ORIGIN = BASE_ADDRESS, LENGTH = 512K
 	ram (wxa) : ORIGIN = BASE_ADDRESS + 512K, LENGTH = 512K
 }
 
 SECTIONS
 {
+	.privileged_functions : ALIGN(4)
+	{
+		*(privileged_functions*)
+	} >rom AT>rom
+
+	.privileged_data : ALIGN(4)
+	{
+		__privileged_data_start__ = .;
+		*(privileged_data*)
+		__privileged_data_end__ = .;
+	} >ram AT>rom
+
 	.init :
 	{
+		__unprivileged_section_start__ = .;
 		_text = .;
 		KEEP (*(SORT_NONE(.init)))
 	} >rom AT>rom
@@ -23,8 +36,11 @@ SECTIONS
 		*(.text.startup .text.startup.*)
 		*(.text .text.*)
 		*(.gnu.linkonce.t.*)
+		*(.htif)
+
+		*(.freertos_system_calls)
 	} >rom AT>rom
-	
+
 	.fini :
 	{
 		KEEP (*(SORT_NONE(.fini)))
@@ -46,6 +62,7 @@ SECTIONS
 	{
 		*(.rdata)
 		*(.rodata .rodata.*)
+		KEEP(*/tasks.o(.rodata*)) /* FreeRTOS Debug Config. */
 		*(.gnu.linkonce.r.*)
 
 		. = ALIGN(8);
@@ -104,6 +121,7 @@ SECTIONS
 
 		. = ALIGN(8);
 		_ebss = .;
+		__unprivileged_section_end__ = .;
 	} >ram AT>rom
 
 	. = ALIGN(8);

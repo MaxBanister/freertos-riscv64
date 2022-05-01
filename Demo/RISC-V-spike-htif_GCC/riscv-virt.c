@@ -28,6 +28,7 @@
 
 #include <string.h>
 
+#include "portmacro.h"
 #include "riscv-virt.h"
 #include "htif.h"
 
@@ -35,7 +36,11 @@ int xGetCoreID( void )
 {
 	int id;
 
+	portRAISE_PRIVILEGE();
+
 	__asm ("csrr %0, mhartid" : "=r" ( id ) );
+
+	portRESET_PRIVILEGE();
 
 	return id;
 }
@@ -46,7 +51,7 @@ volatile int use_htif = 1;
 
 void vSendString( const char *s )
 {
-	portENTER_CRITICAL();
+	//portENTER_CRITICAL();
 
 	if (use_htif) {
 		while (*s) {
@@ -56,7 +61,7 @@ void vSendString( const char *s )
 		htif_putc('\n');
 	}
 
-	portEXIT_CRITICAL();
+	//portEXIT_CRITICAL();
 }
 
 void handle_trap(void)

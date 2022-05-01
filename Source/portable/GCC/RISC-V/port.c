@@ -179,7 +179,7 @@ static void prvSetupPMP( void ) PRIVILEGED_FUNCTION
 		}
 		#endif
 
-		ucDefaultAttribute = ((portPMP_REGION_READ_ONLY) |
+		ucDefaultAttribute = ((portPMP_REGION_READ_WRITE) |
                             (portPMP_REGION_EXECUTE) |
                             (portPMP_REGION_ADDR_MATCH_TOR));
 
@@ -921,13 +921,13 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 	#if( portUSING_MPU_WRAPPERS == 1 )
 		/**
 		 * Generate the value:
-		 * - 0x80   (MPIE set and MPP = usermode) if run in unprivilege mode (xRunPrivileged == 0).
-		 * - 0x1880 (MPIE set and MPP = machinemode) if run in privilege mode (xRunPrivileged != 0).
+		 * - 0x6080   (MPIE set and MPP = usermode) if run in unprivilege mode (xRunPrivileged == 0).
+		 * - 0x7880 (MPIE set and MPP = machinemode) if run in privilege mode (xRunPrivileged != 0).
 		 */
 		__asm__ __volatile__ (
 			"	csrr t0, mstatus	\n"		/* Obtain current mstatus value. */
 			"	andi t0, t0, ~0x8	\n"		/* Ensure interrupts are disabled when the stack is restored within an ISR.  Required when a task is created after the schedulre has been started, otherwise interrupts would be disabled anyway. */
-			"	addi t1, x0, 0x188	\n"		/* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
+			"	addi t1, x0, 0x788	\n"		/* Generate the value 0x1880, which are the MPIE and MPP bits to set in mstatus. */
 			"	slli t1, t1, 4		\n"
 			"	not t2, t1			\n"		/* reset previous value */
 			"	and t0, t0, t2		\n"
@@ -935,7 +935,7 @@ StackType_t * pxPortInitialiseStack( StackType_t * pxTopOfStack,
 			"	beqz a3, 1f			\n"
 			"	addi t1, t1, 0x180	\n"
 			"	1:					\n"
-			"	ori t1, t1, 0x8		\n"
+			"	ori t1, t1, 0x608	\n"
 			"	slli t1, t1, 4		\n"
 			"	or %0, t0, t1		\n"
 			:"=r" ( mstatus )::"t0", "t1", "t2", "a3"

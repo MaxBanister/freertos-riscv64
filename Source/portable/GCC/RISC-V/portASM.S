@@ -652,11 +652,6 @@ switch_context:
 end_trap_handler:
     load_x s0, pxCurrentTCB			/* Load pxCurrentTCB. */
 
-    /* Update privilege_status if needed */
-    // this is definitely wrong
-    load_x  a0, PORT_CONTEXT_mstatusOFFSET(sp)
-    jal vPortUpdatePrivilegeStatus
-
     /* restore registers */
 #ifdef __riscv_fdiv
     // this is also wrong, since there is no guarantee FP regs were actually used
@@ -664,6 +659,13 @@ end_trap_handler:
     addi 	a0, a0, portasmADDITIONAL_CONTEXT_WORDSIZE
     portRESTORE_FpuReg
 #endif /* __riscv_fdiv */
+
+    /* Update privilege_status if needed */
+    // we put this in between restoring registers because, after restoring
+    // the floating point registers, the value of mstatus will be in t1
+    mv a0, t1
+    //load_x  a0, PORT_CONTEXT_mstatusOFFSET(sp)
+    jal vPortUpdatePrivilegeStatus
 
     portasmRESTORE_ADDITIONAL_REGISTERS
 
@@ -720,18 +722,12 @@ xPortStartFirstTask:
     load_x  sp, 0( t2 )				 	/* Read sp from first TCB member. */
 
     // the stack now is now the task's stack
-
-    /* Update privilege_status if needed */
-    // sp isn't pointing to base regs though?
-    load_x  a0, PORT_CONTEXT_mstatusOFFSET(sp)
-    jal vPortUpdatePrivilegeStatus
-
     jal vPortPmpSwitch
 
+    // we re-get the task's stack (sp shouldn't have changed but whatever)
     load_x  t2, pxCurrentTCB            /* Load pxCurrentTCB. */
     load_x  sp, 0( t2 )				 	/* Read sp from first TCB member. */
 
-    // we re-get the task's stack (sp shouldn't have changed but whatever)
 
     // set a0 to the address of the base regs
     // then, pop the fregs off the stack, incrementing sp (if fregs were used!)
@@ -741,11 +737,17 @@ xPortStartFirstTask:
     portRESTORE_FpuReg
 #endif /* __riscv_fdiv */
 
+    /* Update privilege_status if needed */
+    // we put this in between restoring registers because, after restoring
+    // the floating point registers, the value of mstatus will be in t1
+    mv a0, t1
+    //load_x  a0, PORT_CONTEXT_mstatusOFFSET(sp)
+    jal vPortUpdatePrivilegeStatus
+
     // does nothing
     portasmRESTORE_ADDITIONAL_REGISTERS
 
     // now sp points to the base regs (except it doesn't, it still points to the zeroed fregs)
-
     // so, put in a hacky fix to pop off zeroed floating point regs
     // this will have to change if ever we use floating point in main
     //addi sp, sp, portasmFPU_CONTEXT_WORDSIZE

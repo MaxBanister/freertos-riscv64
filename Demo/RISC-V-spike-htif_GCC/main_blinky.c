@@ -69,7 +69,6 @@ static void prvQueueSendTask( void *pvParameters )
 
 	for( ;; )
 	{
-		vSendString("Getting here 2");
 		/* Place this task in the blocked state until it is time to run again. */
 		vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
 
@@ -97,7 +96,6 @@ static void prvQueueReceiveTask( void *pvParameters )
 
 	for( ;; )
 	{
-		vSendString("Getting here\n");
 		double ulReceivedValue;
 		/* Wait until something arrives in the queue - this task will block
 		indefinitely provided INCLUDE_vTaskSuspend is set to 1 in

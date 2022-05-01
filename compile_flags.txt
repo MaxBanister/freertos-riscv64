@@ -6,5 +6,6 @@
 -I/opt/riscv/riscv64-unknown-elf/include
 -DportHANDLE_INTERRUPT=handle_trap
 -DportHANDLE_EXCEPTION=handle_trap
+-DportUSING_MPU_WRAPPERS=1
 -D__riscv_xlen=64
 -D__riscv_fdiv

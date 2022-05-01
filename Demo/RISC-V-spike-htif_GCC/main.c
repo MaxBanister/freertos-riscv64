@@ -42,7 +42,7 @@ void vApplicationTickHook( void );
 /*
  * Setup the Spike simulator to run this demo.
  */
-static void prvSetupSpike( void );
+//static void prvSetupSpike( void );
 
 int main_blinky( void );
 
@@ -65,10 +65,10 @@ int main( void )
 	return ret;
 }
 /*-----------------------------------------------------------*/
-static void prvSetupSpike( void )
+/*static void prvSetupSpike( void )
 {
 	__asm__ volatile( "csrw mtvec, %0" :: "r"( freertos_risc_v_trap_handler ) );
-}
+}*/
 
 /*-----------------------------------------------------------*/
 
