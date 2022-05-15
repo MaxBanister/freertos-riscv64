@@ -64,8 +64,10 @@ void vSendString( const char *s )
 	//portEXIT_CRITICAL();
 }
 
-void handle_trap(void)
-{
-	while (1)
-		;
+void send_ipi() {
+	*(volatile uint32_t *)CLINT_MSIP_ADDR = 1;
+}
+
+void clear_msip() {
+	*(volatile uint32_t *)(CLINT_MSIP_ADDR + 4) = 0;
 }

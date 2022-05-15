@@ -40,7 +40,8 @@ _start:
 	// Continue primary hart
 	csrr a0, mhartid
 	li   a1, PRIM_HART
-	bne  a0, a1, secondary
+	// Support AMP kernel configurations
+	//bne  a0, a1, secondary
 
 	// Primary hart
 	la sp, _stack_top

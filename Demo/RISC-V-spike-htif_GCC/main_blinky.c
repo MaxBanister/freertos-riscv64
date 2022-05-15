@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 
+#include "portmacro.h"
 #include "riscv-virt.h"
 
 /* Priorities used by the tasks. */
@@ -51,6 +52,8 @@ find the queue full. */
 
 /*-----------------------------------------------------------*/
 
+static volatile uint64_t command_queue[512] __attribute__((section(".command_queue")));
+
 /* The queue used by both tasks. */
 static QueueHandle_t xQueue = NULL;
 
@@ -67,6 +70,10 @@ static void prvQueueSendTask( void *pvParameters )
 	/* Initialise xNextWakeTime - this only needs to be done once. */
 	xNextWakeTime = xTaskGetTickCount();
 
+	char buf0[40];
+	sprintf(buf0, "End address of command queue: 0x%p", &command_queue[512]);
+	vSendString(buf0);
+
 	for( ;; )
 	{
 		/* Place this task in the blocked state until it is time to run again. */
@@ -75,15 +82,23 @@ static void prvQueueSendTask( void *pvParameters )
 		ulValueToSend++;
 
 		char buf[40];
-		sprintf( buf, "%d: %s: send %lld", xGetCoreID(),
+		/*sprintf( buf, "%d: %s: send %lld", xGetCoreID(),
 				pcTaskGetName( xTaskGetCurrentTaskHandle() ),
 				(long long)ulValueToSend );
+		vSendString( buf );*/
+
+		vRaisePrivilege();
+		sprintf( buf, "command queue first word: %lu", command_queue[0]);
 		vSendString( buf );
+
+		// interrupt linux
+		//send_ipi();
+		vResetPrivilege();
 
 		/* 0 is used as the block time so the sending operation will not block -
 		 * it shouldn't need to block as the queue should always be empty at
 		 * this point in the code. */
-		xQueueSend( xQueue, &ulValueToSend, 0U );
+		//xQueueSend( xQueue, &ulValueToSend, 0U );
 	}
 }
 
@@ -136,3 +151,18 @@ int main_blinky( void )
 
 	return 0;
 }
+
+void handle_trap(void)
+{
+	clear_msip();
+	vSendString("Inside trap");
+
+	MemoryRegion_t regions = {
+
+	};
+
+	TaskParameters_t params = {
+
+	};
+}
+

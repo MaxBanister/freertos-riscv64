@@ -629,6 +629,8 @@ restore_before_exit:
     j end_trap_handler
 #endif /* portasmHAS_CLINT */
 
+// We repurpose this label for software interrupts,
+// since we don't get external interrupts anyway
 external_interrupt:
     /* Switch to ISR stack before function call. */
     load_x sp, xISRStackTop
@@ -760,7 +762,7 @@ xPortStartFirstTask:
 
     /* enable interrupt */
     #if( portasmHAS_CLINT != 0 )
-        li t0, 0x880
+        li t0, 0x888
         csrs mie, t0
     #else
         li t0, 0x800

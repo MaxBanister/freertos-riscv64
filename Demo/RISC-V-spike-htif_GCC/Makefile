@@ -44,16 +44,17 @@ LDFLAGS = -nostartfiles \
 ifeq ($(DEBUG), 1)
     CFLAGS += -Og -ggdb3
 else
-    CFLAGS += -Os
+    CFLAGS += -O2
 endif
 
+#$(DEMO_SOURCE_DIR)/EventGroupsDemo.c \
+#$(DEMO_SOURCE_DIR)/TaskNotify.c \
+#$(DEMO_SOURCE_DIR)/TimerDemo.c \
+#$(DEMO_SOURCE_DIR)/blocktim.c \
+#$(DEMO_SOURCE_DIR)/dynamic.c \
+#$(DEMO_SOURCE_DIR)/recmutex.c
+
 SRCS = main.c main_blinky.c riscv-virt.c htif.c \
-	$(DEMO_SOURCE_DIR)/EventGroupsDemo.c \
-	$(DEMO_SOURCE_DIR)/TaskNotify.c \
-	$(DEMO_SOURCE_DIR)/TimerDemo.c \
-	$(DEMO_SOURCE_DIR)/blocktim.c \
-	$(DEMO_SOURCE_DIR)/dynamic.c \
-	$(DEMO_SOURCE_DIR)/recmutex.c \
 	$(RTOS_SOURCE_DIR)/event_groups.c \
 	$(RTOS_SOURCE_DIR)/list.c \
 	$(RTOS_SOURCE_DIR)/queue.c \

@@ -42,10 +42,14 @@
 #define CLINT_MTIMECMP		CONS(0x4000, UL)
 #define CLINT_MTIME			CONS(0xbff8, UL)
 
+#define CLINT_MSIP_ADDR		( CLINT_ADDR + CLINT_MSIP )
+
 #ifndef __ASSEMBLER__
 
 int xGetCoreID( void );
 void vSendString( const char * s );
+void send_ipi(void);
+void clear_msip(void);
 
 #endif /* __ASSEMBLER__ */
 

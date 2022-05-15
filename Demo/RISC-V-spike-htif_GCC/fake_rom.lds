@@ -11,6 +11,11 @@ MEMORY
 
 SECTIONS
 {
+	.command_queue : ALIGN(12)
+	{
+		*(.command_queue)
+	}
+
 	.privileged_functions : ALIGN(4)
 	{
 		*(privileged_functions*)
